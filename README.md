@@ -14,7 +14,7 @@ Le contenu pédagogique provient du cours de **M. Pascal Poizat**, **Université
 - Support : **« Outils de test »**, version 1.0 (septembre 2026), 55 slides
 - Complément : un résumé personnel de l'étudiant (« Cour 5 : xUnit en Java : écrire et exécuter des tests »), construit à partir de ce support
 
-Tout le code et les notions présentés dans le programme viennent de ce support et de ce résumé. Les droits sur le cours appartiennent à son auteur. Ce programme est un outil d'étude personnel, **non officiel**, sans lien avec l'université.
+Tout le code et les notions présentés dans le programme viennent d'un support de M. Pascal Poizat et Complété par des résumés et des notions complémentaires préparés par ELHADJ MIMOUNE Nour El Islam. Les droits sur le cours appartiennent à son auteur. Ce programme est un outil d'étude personnel, **non officiel**, sans lien avec l'université.
 
 ---
 
