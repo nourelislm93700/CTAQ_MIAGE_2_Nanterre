@@ -2,8 +2,7 @@
 
 Outil de révision interactif pour **apprendre à écrire de mémoire** le code de test Java vu en cours : JUnit 5, Hamcrest, Mockito, EasyMock, Cucumber et JaCoCo. L'objectif n'est pas seulement de lire le code, mais de le réécrire soi-même et de comprendre le rôle de chaque ligne.
 
-**Application en ligne :** https://claude.ai/artifact/HS8oYbsoovuEMoJepdydvt
-**Fichier source :** `quiz-code-ctaq.html` (une seule page, sans dépendance)
+
 
 ---
 
@@ -11,7 +10,7 @@ Outil de révision interactif pour **apprendre à écrire de mémoire** le code 
 
 Le contenu pédagogique provient du cours de **M. Pascal Poizat**, **Université Paris Nanterre**.
 
-- Module : **CTAQ — Contrats, Tests et Assurance Qualité**
+- Module : **CTAQ  | Contrats, Tests et Assurance Qualité**
 - Support : **« Outils de test »**, version 1.0 (septembre 2026), 55 slides
 - Complément : un résumé personnel de l'étudiant (« Cour 5 : xUnit en Java : écrire et exécuter des tests »), construit à partir de ce support
 
