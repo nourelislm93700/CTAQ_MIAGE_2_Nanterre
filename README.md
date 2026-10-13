@@ -124,5 +124,5 @@ Tu réécris une classe, un test ou un extrait entier dans un éditeur coloré f
 
 ## Crédits
 
-- **Cours et code source pédagogique** : Pascal Poizat, Université Paris Nanterre — module CTAQ, « Outils de test », v1.0 (09/2026).
+- **Cours et code source pédagogique** : Pascal Poizat, Université Paris Nanterre module CTAQ, « Outils de test », v1.0 (09/2026).
 - **Outil de révision** : réalisé à partir du support de cours et du résumé personnel de l'étudiant, avec l'aide de Claude (Anthropic).
