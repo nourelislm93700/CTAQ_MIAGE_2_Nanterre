@@ -1,4 +1,4 @@
-# Réviser le code de test Java — CTAQ
+# Réviser le code de test Java : CTAQ
 
 Outil de révision interactif pour **apprendre à écrire de mémoire** le code de test Java vu en cours : JUnit 5, Hamcrest, Mockito, EasyMock, Cucumber et JaCoCo. L'objectif n'est pas seulement de lire le code, mais de le réécrire soi-même et de comprendre le rôle de chaque ligne.
 
