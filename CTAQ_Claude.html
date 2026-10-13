@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Réviser le code de test Java, ligne par ligne</title>
+<style>
+:root{--bg:#f6f5f1;--fg:#23272b;--mut:#6a7178;--card:#fff;--line:#dcdad2;--acc:#3b6a8f;--ok:#e3efe3;--okf:#2f5d34;--bad:#f6e4e1;--badf:#8a3a30;--code:#f0efe9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d2023;--fg:#e4e2dc;--mut:#9aa1a8;--card:#272b2f;--line:#3a3f44;--acc:#8db4d4;--ok:#26382a;--okf:#a5cfa8;--bad:#3b2926;--badf:#e0a39a;--code:#202327}}
+:root[data-theme="dark"]{--bg:#1d2023;--fg:#e4e2dc;--mut:#9aa1a8;--card:#272b2f;--line:#3a3f44;--acc:#8db4d4;--ok:#26382a;--okf:#a5cfa8;--bad:#3b2926;--badf:#e0a39a;--code:#202327}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.1rem;margin:0 0 12px;font-weight:600}
+.top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+select{font:inherit;font-size:.95rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--fg);max-width:100%}
+.bar{height:6px;background:var(--line);border-radius:3px;margin:10px 0 4px}.bar i{display:block;height:100%;background:var(--acc);border-radius:3px}
+.sm{font-size:.85rem;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:14px}
+.k{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin:0 0 10px}
+pre,code,input{font-family:ui-monospace,Consolas,Menlo,monospace}
+pre{background:var(--code);padding:14px;border-radius:8px;overflow-x:auto;margin:0 0 14px;font-size:.95rem;white-space:pre}
+code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+.tip{border-left:3px solid var(--acc);padding-left:12px;color:var(--mut);margin:14px 0}
+input{width:100%;box-sizing:border-box;font-size:.95rem;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);margin:8px 0 14px}
+input:focus{outline:2px solid var(--acc);outline-offset:1px}
+button{font:inherit;font-size:.95rem;padding:9px 16px;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:var(--bg);cursor:pointer;margin:0 8px 8px 0}
+button.s{background:transparent;color:var(--acc)}
+.res{padding:12px;border-radius:8px;margin-bottom:12px}.res.ok{background:var(--ok);color:var(--okf)}.res.ko{background:var(--bad);color:var(--badf)}
+mark{border-radius:3px;padding:0 1px;color:inherit}mark.m{background:#d9b44a66;text-decoration:underline}mark.x{background:#c9544466;text-decoration:line-through}
+.code,.ed pre,.ed textarea{font:15px/1.55 ui-monospace,"Cascadia Code",Consolas,Menlo,monospace;tab-size:4}
+pre.code,.lns{background:#1e1e1e;color:#d4d4d4;border:1px solid #333;border-radius:8px;overflow-x:auto;margin:0 0 14px}
+pre.code{padding:14px;white-space:pre}
+.lns{padding:6px 0}
+.ln{padding:3px 12px;border-left:3px solid #4a8f55;white-space:pre;font:15px/1.55 ui-monospace,Consolas,Menlo,monospace}
+.ln.ko{border-color:#c75d50;background:#2a1f1e}.you{color:#9aa1a8}
+.ed{position:relative;background:#1e1e1e;border:1px solid #333;border-radius:8px;margin:8px 0 14px}
+.ed:focus-within{outline:2px solid var(--acc)}
+.ed pre,.ed textarea{margin:0;padding:12px;border:0;white-space:pre;box-sizing:border-box;width:100%;background:transparent}
+.ed pre{position:absolute;top:0;left:0;height:100%;overflow:hidden;pointer-events:none;color:#d4d4d4}
+.ed textarea{position:relative;display:block;color:transparent;caret-color:#fff;resize:none;overflow-x:auto;overflow-y:hidden;outline:none}
+.ed textarea::selection{background:#264f78}
+.t-k{color:#569cd6}.t-g{color:#c586c0}.t-f{color:#dcdcaa}.t-y{color:#4ec9b0}.t-v{color:#9cdcfe}.t-s{color:#ce9178}.t-n{color:#b5cea8}.t-c{color:#6a9955}.t-a{color:#dcdcaa}
+main{max-width:780px}
+h1{font-size:1.35rem;letter-spacing:-.01em}
+.card{border-radius:14px;padding:22px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.k{display:inline-block;background:var(--code);padding:3px 12px;border-radius:999px;letter-spacing:.06em}
+button{border-radius:10px;padding:10px 18px;font-weight:500;transition:filter .15s}
+button:hover{filter:brightness(1.12)}
+button:disabled{cursor:default;filter:none}
+.top button{padding:7px 14px;border-radius:999px}
+.bar{display:none}
+.seg{display:flex;gap:4px;margin:16px 0 6px}.seg i{flex:1;height:7px;border-radius:4px;background:var(--line);cursor:pointer}.seg i.d{background:var(--acc)}.seg i.c{background:var(--acc);opacity:.5}
+.qq{font-size:1.1rem;font-weight:600;margin:6px 0 16px}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--card);color:var(--fg);border:1px solid var(--line);margin:0 0 10px;padding:12px 14px}
+.opt b{color:var(--acc);min-width:1.2em}
+.opt:hover:not(:disabled){border-color:var(--acc);filter:none}
+.opt.good{border-color:#4a8f55;background:var(--ok);color:var(--okf)}.opt.bad{border-color:#c75d50;background:var(--bad);color:var(--badf)}
+</style>
+</head>
+<body>
+<main>
+<h1>Réviser le code de test Java</h1><p class="sm" style="margin:-6px 0 12px">Cours CTAQ · outils de test · apprends à l'écrire de mémoire</p>
+<div class="top"><select id="sel" onchange="jump(this.value)"></select><button id="ml" onclick="setM('line')">Ligne par ligne</button><button id="mb" class="s" onclick="setM('block')">Bloc complet</button></div>
+<div id="seg" class="seg"></div><div class="bar"><i id="pb"></i></div><div class="sm" id="pt"></div>
+<div class="card" id="app"></div>
+<p class="sm">L'indentation et les espaces multiples ne sont pas évalués ; tout le reste (majuscules, guillemets, point-virgule) doit être exact, sauf le nom des classes et méthodes que tu déclares (il t'est donné en indice).</p>
+</main>
+<script>
+var D=[
+["1. Les imports (JUnit, Hamcrest, Mockito)","Les slides n'affichent pas les imports, mais le code ne compile pas sans eux. Une adresse d'import se lit comme une adresse postale : du plus général au plus précis.",[
+["importer l'annotation @Test","import org.junit.jupiter.api.Test;","<b>import</b> : « apporte » une classe pour pouvoir l'utiliser. <b>org</b> : domaine de l'organisation (adresse inversée). <b>junit</b> : le framework. <b>jupiter</b> : le modèle de programmation de JUnit 5 (annotations). <b>api</b> : la partie publique à utiliser. <b>Test</b> : l'annotation <code>@Test</code>. Le <b>;</b> termine l'instruction.","comme une adresse : pays → ville → rue → numéro."],
+["importer @BeforeEach","import org.junit.jupiter.api.BeforeEach;","Même chemin que <code>Test</code>, seule la fin change. <code>BeforeEach</code> marque une méthode exécutée avant chaque test."],
+["importer toutes les assertions","import static org.junit.jupiter.api.Assertions.*;","<b>static</b> : importe des méthodes statiques (<code>assertEquals</code>, <code>assertThrows</code>…) pour les appeler sans préfixe. <b>*</b> : toutes d'un coup.","sans static : <code>Assertions.assertEquals(...)</code> ; avec : <code>assertEquals(...)</code>."],
+["importer assertThat (Hamcrest)","import static org.hamcrest.MatcherAssert.assertThat;","<code>assertThat</code> n'existe pas dans JUnit Jupiter : il vient de <b>Hamcrest</b> (<code>org.hamcrest</code>), classe <code>MatcherAssert</code>."],
+["importer les matchers Hamcrest","import static org.hamcrest.Matchers.*;","Importe <code>hasSize</code>, <code>hasItem</code>, <code>not</code>, <code>allOf</code>… Un « matcher » décrit la propriété attendue."],
+["importer mock, when, verify","import static org.mockito.Mockito.*;","<b>Mockito</b> (<code>org.mockito</code>) : <code>mock</code>, <code>when</code>, <code>verify</code>, <code>never</code>, <code>any</code>, <code>eq</code>…"],
+["importer l'annotation @Suite","import org.junit.platform.suite.api.Suite;","<b>platform</b> : JUnit Platform, le socle qui découvre et lance les tests (Jupiter est un moteur posé dessus). <b>suite.api</b> : regrouper des classes de tests. Fournie par <code>junit-platform-suite</code>.","JUnit 5 = Platform (lanceur) + Jupiter (écrire les tests) + Vintage (anciens tests JUnit 4)."]]],
+["2. Anatomie d'un test","Un test : préparer, exécuter, vérifier.",[
+["déclarer la classe de tests","class DiscountTest {","<b>class</b> déclare une classe ; son nom finit par <code>Test</code> par convention. <b>{</b> ouvre son corps (fermé plus loin par <code>}</code>)."],
+["marquer une méthode de test","@Test","Annotation : une étiquette qui dit à JUnit « cette méthode est un test, exécute-la ». Sans elle, rien ne se lance."],
+["déclarer la méthode de test","void appliqueDixPourCentAuDelaDeCent() {","<b>void</b> : ne renvoie rien. Le nom décrit le comportement attendu. <b>()</b> : aucun paramètre (une méthode de test n'en a pas)."],
+["préparer : créer l'objet","Discount remise = new Discount();","<code>Discount</code> : le type ; <code>remise</code> : le nom de la variable ; <b>new</b> crée un objet en appelant le constructeur <code>Discount()</code>. Étape « préparer »."],
+["exécuter : appeler la méthode","double resultat = remise.apply(150.0);","<b>double</b> : nombre décimal. On appelle <code>apply</code> sur <code>remise</code> avec 150.0 et on garde le résultat. Étape « exécuter »."],
+["vérifier avec tolérance","assertEquals(135.0, resultat, 0.001);","Attendu <b>en premier</b>, obtenu ensuite. Le 3e nombre est la <b>tolérance</b> : les <code>double</code> sont approximatifs, on accepte 0.001 d'écart.","inverser attendu et obtenu rend le message d'échec trompeur."],
+["vérifier qu'une exception est levée","assertThrows(IllegalArgumentException.class, () -> remise.apply(-1.0));","Réussit seulement si l'appel lève cette exception. <code>.class</code> désigne le type ; <code>() -&gt; ...</code> est une <b>lambda</b> : le code à exécuter, passé en argument."]]],
+["3. Fixture (@BeforeEach)","La fixture : le contexte reconstruit avant chaque test, pour que les tests restent indépendants.",[
+["déclarer l'attribut de la fixture","private Discount remise;","Attribut de la classe, partagé par ses méthodes. <b>private</b> : visible seulement dans la classe. Pas de valeur pour l'instant : elle sera donnée dans <code>init()</code>."],
+["exécuter avant chaque test","@BeforeEach","La méthode qui suit tourne avant <b>chaque</b> test. À l'inverse, <code>@BeforeAll</code> : une seule fois (méthode <code>static</code>)."],
+["méthode d'initialisation","void init() {","Nom libre (init, setUp…). Pas de <code>@Test</code> : c'est de la préparation, pas un test."],
+["reconstruire la fixture","remise = new Discount();","Pas de type devant : on affecte l'attribut existant. Un objet neuf à chaque test évite qu'un test influence le suivant."]]],
+["4. Hamcrest","assertThat(valeur, matcher) : les matchers se lisent presque comme une phrase.",[
+["vérifier la taille","assertThat(panier.refs(), hasSize(2));","<code>panier.refs()</code> renvoie la liste ; <code>hasSize(2)</code> vérifie qu'elle contient 2 éléments."],
+["vérifier la présence","assertThat(panier.refs(), hasItem(\"A\"));","Vérifie que la liste contient \"A\". Les guillemets délimitent une chaîne (<code>String</code>)."],
+["ordre indifférent","assertThat(panier.refs(), containsInAnyOrder(\"B\", \"A\"));","Exactement ces éléments, dans n'importe quel ordre : \"B\", \"A\" convient pour [A, B]."],
+["négation","assertThat(panier.refs(), not(hasItem(\"C\")));","<code>not(...)</code> inverse le matcher : « ne contient pas \"C\" ». Les matchers s'emboîtent."],
+["conjonction","assertThat(panier.refs(), allOf(hasItem(\"A\"), hasItem(\"B\")));","<code>allOf</code> : toutes les conditions doivent être vraies (ET). <code>anyOf</code> : au moins une (OU)."]]],
+["5. Mockito","Mockito crée des doublures sans écrire de classe à la main.",[
+["créer une doublure","IPriceProvider prix = mock(IPriceProvider.class);","Mockito fabrique un objet qui implémente l'interface. <code>.class</code> indique laquelle. Par défaut, ses méthodes renvoient 0, null ou rien."],
+["programmer une réponse (Stub)","when(prix.priceOf(\"A\")).thenReturn(12.0);","Se lit : « quand on appelle priceOf(\"A\"), renvoie 12.0 ». Rôle de Stub : on fournit des entrées au composant testé."],
+["créer la doublure du notifieur","INotifier notifier = mock(INotifier.class);","Même principe pour <code>INotifier</code>. On s'en servira pour observer les appels (rôle Spy)."],
+["vérifier un appel après coup","verify(notifier).send(eq(\"client@example.com\"), contains(\"20.0\"));","Après l'exécution : « send a-t-il été appelé une fois avec ces arguments ? ». <code>eq(...)</code> : égal à. <code>contains(...)</code> : texte contenant \"20.0\".","dès qu'un argument est un matcher, tous les arguments doivent en être."],
+["vérifier qu'un appel n'a jamais eu lieu","verify(notifier, never()).send(any(), contains(\"erreur\"));","<code>never()</code> : zéro appel. <code>any()</code> : n'importe quel destinataire."]]],
+["6. EasyMock","Philosophie inverse de Mockito : attentes posées avant, vérifiées par la doublure.",[
+["importer EasyMock","import static org.easymock.EasyMock.*;","<code>org.easymock</code> fournit <code>mock</code>, <code>replay</code>, <code>verify</code>… Mêmes noms que Mockito : ne pas importer les deux dans le même fichier."],
+["enregistrer l'appel attendu","notifier.send(\"client@example.com\", \"Commande confirmee : 20.0\");","Phase <b>enregistrement</b> : on joue l'appel attendu devant la doublure. Il n'est pas exécuté pour de vrai, il est noté comme attendu."],
+["passer en mode rejeu","replay(notifier);","Fin de l'enregistrement. Désormais chaque appel reçu est comparé à l'attendu ; un appel imprévu fait échouer le test."],
+["vérifier les attentes","verify(notifier);","La doublure contrôle elle-même que tous les appels attendus ont eu lieu : c'est ce qui en fait un vrai Mock.","Mockito : le test vérifie après. EasyMock : la doublure vérifie, attentes posées avant."]]],
+["7. Suite JUnit et Cucumber","Cucumber exécute des scénarios Gherkin ; une suite JUnit permet de les lancer.",[
+["déclarer une suite","@Suite","Annotation de JUnit Platform : cette classe regroupe des tests à lancer ensemble."],
+["utiliser le moteur Cucumber","@IncludeEngines(\"cucumber\")","Un moteur sait exécuter un type de test. Ici celui de Cucumber, qui lit les scénarios Gherkin (fichiers .feature)."],
+["choisir le paquetage","@SelectPackages(\"org.example.commande\")","Cherche les scénarios dans ce paquetage."],
+["relier une étape Gherkin à Java","@Given(\"un catalogue où A coûte {double} et B coûte {double}\")","Relie la phrase <code>Given</code> du .feature à la méthode qui suit. <code>{double}</code> : valeur extraite de la phrase et passée en paramètre."],
+["étape Then : vérifier l'envoi","verify(notifier).send(eq(client), contains(texte));","Mockito dans une étape <code>Then</code> : on vérifie qu'un message contenant le texte attendu a été envoyé au client."]]]
+];
+function mk(t,i,code,notes,langs){var bl=code.split('\n\n\n'),all=[],lg=[];langs=langs||[];
+bl.forEach(function(b,k){b.split('\n').forEach(function(l){if(l.trim()){all.push(l);lg.push(langs[k]||'java')}})});
+var m=[t,i,notes.map(function(n){return[n[1],all[n[0]-1].trim(),n[2],n[3]||'',lg[n[0]-1]]})];
+m.B=bl.map(function(b,k){return[t+(bl.length>1?' ('+(k+1)+'/'+bl.length+')':''),b,langs[k]||'java']});return m}
+D[1].B=[["Classe DiscountTest complète",`class DiscountTest {
+    @Test
+    void appliqueDixPourCentAuDelaDeCent() {
+        Discount remise = new Discount();
+        double resultat = remise.apply(150.0);
+        assertEquals(135.0, resultat, 0.001);
+    }
+
+    @Test
+    void refuseUnMontantNegatif() {
+        Discount remise = new Discount();
+        assertThrows(IllegalArgumentException.class, () -> remise.apply(-1.0));
+    }
+}`]];
+D[2].B=[["DiscountTest avec fixture",`class DiscountTest {
+    private Discount remise;
+
+    @BeforeEach
+    void init() {
+        remise = new Discount();
+    }
+
+    @Test
+    void appliqueDixPourCentAuDelaDeCent() {
+        assertEquals(135.0, remise.apply(150.0), 0.001);
+    }
+}`]];
+D[3].B=[["Test Hamcrest complet",`@Test
+void unPanierContientLesReferencesAjoutees() {
+    Panier panier = new Panier();
+    panier.ajouter("A");
+    panier.ajouter("B");
+
+    assertThat(panier.refs(), hasSize(2));
+    assertThat(panier.refs(), hasItem("A"));
+    assertThat(panier.refs(), containsInAnyOrder("B", "A"));
+    assertThat(panier.refs(), not(hasItem("C")));
+    assertThat(panier.refs(), allOf(hasItem("A"), hasItem("B")));
+}`]];
+D[4].B=[["Mockito : rôle Stub",`@Test
+void calculeLeTotalAvecMockito() {
+    IPriceProvider prix = mock(IPriceProvider.class);
+    when(prix.priceOf("A")).thenReturn(12.0);
+    when(prix.priceOf("B")).thenReturn(8.0);
+    OrderService service =
+        new OrderService(prix, new DummyNotifier());
+    assertEquals(20.0, service.total(List.of("A", "B")));
+}`],["Mockito : rôle Spy",`@Test
+void confirmerNotifieLeClientAvecMockito() {
+    INotifier notifier = mock(INotifier.class);
+    OrderService service =
+        new OrderService(new StubPriceProvider(), notifier);
+    service.confirm("client@example.com", List.of("A", "B"));
+    verify(notifier)
+        .send(eq("client@example.com"), contains("20.0"));
+    verify(notifier, never()).send(any(), contains("erreur"));
+}`]];
+D[5].B=[["EasyMock : test complet",`@Test
+void confirmerNotifieLeClientAvecEasyMock() {
+    INotifier notifier = mock(INotifier.class);
+    notifier.send("client@example.com", "Commande confirmee : 20.0");
+    replay(notifier);
+
+    OrderService service = new OrderService(new StubPriceProvider(), notifier);
+    service.confirm("client@example.com", List.of("A", "B"));
+
+    verify(notifier);
+}`]];
+var N=[
+mk("Fil rouge : interfaces et OrderService","Un service de commande avec deux dépendances (collaborateurs) : c'est le code que les doublures vont remplacer.",`public interface IPriceProvider {
+    double priceOf(String ref);
+}
+
+public interface INotifier {
+    void send(String to, String message);
+}
+
+
+public class OrderService {
+    public OrderService(IPriceProvider prices, INotifier notifier) { ... }
+    public double total(List<String> refs) {
+        double somme = 0.0;
+        for (String ref : refs) somme += prices.priceOf(ref);
+        return somme;
+    }
+    public void confirm(String email, List<String> refs) { ... }
+}`,[
+[1,"interface du fournisseur de prix",`<b>public</b> : accessible partout. <b>interface</b> : un contrat (méthodes sans corps) qu'une classe, vraie ou doublure, <b>implémente</b>.`],
+[2,"méthode priceOf",`Signature seule, terminée par <code>;</code>. Renvoie le prix (<code>double</code>) d'un article identifié par sa référence (<code>String</code>).`],
+[4,"interface du notifieur",`Deuxième dépendance de <code>OrderService</code>.`],
+[5,"méthode send",`<code>void</code> : ne renvoie rien. Envoie un message à un destinataire.`],
+[7,"classe OrderService",`Le composant testé (SUT). Pas d'interface : seul le test l'utilise.`],
+[8,"constructeur avec ses dépendances",`Même nom que la classe, pas de type de retour. Les collaborateurs sont <b>injectés</b> : on peut donc les remplacer par des doublures. <code>{ ... }</code> : corps omis dans le cours.`],
+[9,"méthode total",`<code>List&lt;String&gt;</code> : liste de chaînes (les références). Renvoie la somme des prix.`],
+[10,"initialiser la somme",`<code>0.0</code> : décimal. Cette variable accumule le total.`],
+[11,"boucle for-each",`Pour chaque <code>ref</code> de <code>refs</code>, on ajoute son prix (<code>+=</code> ajoute à la variable). Une seule instruction : pas d'accolades.`],
+[12,"renvoyer le total",`<code>return</code> renvoie la valeur à l'appelant.`],
+[14,"méthode confirm",`Envoie le total au client par le notifieur.`]]),
+mk("Dummy","Objet passé en paramètre mais jamais utilisé : il remplit seulement une signature.",`class DummyPriceProvider implements IPriceProvider {
+    public double priceOf(String ref) {
+        throw new UnsupportedOperationException("jamais censé être appelé");
+    }
+}
+
+class DummyNotifier implements INotifier {
+    public void send(String to, String message) {
+        throw new UnsupportedOperationException("jamais censé être appelé");
+    }
+}
+
+
+@Test
+void leTotalDUneCommandeVideEstNul() {
+    IPriceProvider prix = new DummyPriceProvider();
+    INotifier notifier = new DummyNotifier();
+    OrderService service = new OrderService(prix, notifier);
+
+    assertEquals(0.0, service.total(List.of()));
+}`,[
+[1,"classe Dummy du fournisseur",`<b>implements</b> : la classe respecte le contrat de l'interface et doit définir toutes ses méthodes.`],
+[2,"méthode priceOf du Dummy",`Elle existe pour respecter l'interface, mais ne fait rien d'utile.`],
+[3,"lever une exception si appelé",`<b>throw new ...</b> lève une exception : si le Dummy est appelé, le test échoue, car il ne devait jamais l'être.`],
+[6,"classe Dummy du notifieur",`Même idée pour <code>INotifier</code>.`],
+[12,"test : commande vide",`Liste vide : la boucle ne tourne pas, aucune dépendance n'est utilisée.`],
+[13,"créer le dummy prix",`Le type est l'interface, l'objet est le Dummy : le composant ne voit que le contrat.`],
+[15,"créer le composant testé",`On lui injecte les deux doublures.`],
+[16,"vérifier le total nul",`<code>List.of()</code> : liste vide immuable. Résultat attendu : 0.0.`]]),
+mk("Fake","Implémentation qui fonctionne vraiment, mais en plus simple : un catalogue en mémoire au lieu d'une base.",`class InMemoryPriceProvider implements IPriceProvider {
+    private final Map<String, Double> catalogue;
+
+    InMemoryPriceProvider(Map<String, Double> catalogue) {
+        this.catalogue = Map.copyOf(catalogue);
+    }
+
+    public double priceOf(String ref) { return catalogue.getOrDefault(ref, 0.0); }
+}
+
+
+@Test
+void calculeLeTotalAvecUnCatalogueEnMemoire() {
+    IPriceProvider prix = new InMemoryPriceProvider(Map.of("A", 12.0, "B", 8.0));
+    OrderService service = new OrderService(prix, new DummyNotifier());
+
+    assertEquals(20.0, service.total(List.of("A", "B")));
+}`,[
+[1,"classe Fake en mémoire",`Un Fake répond vraiment, avec une logique simplifiée.`],
+[2,"attribut catalogue",`<b>final</b> : affecté une seule fois. <code>Map&lt;String, Double&gt;</code> : dictionnaire référence → prix.`],
+[3,"constructeur",`Le catalogue est fourni à la construction.`],
+[4,"copie défensive",`<b>this</b> désigne l'attribut (et non le paramètre de même nom). <code>Map.copyOf</code> : copie immuable.`],
+[6,"méthode priceOf",`<code>getOrDefault(ref, 0.0)</code> : le prix, ou 0.0 si la référence est absente.`],
+[10,"créer le Fake avec un catalogue",`<code>Map.of(clé, valeur, ...)</code> crée un dictionnaire : A→12.0, B→8.0.`],
+[11,"créer le service",`Un Dummy pour le notifieur : <code>total()</code> ne notifie jamais.`],
+[12,"vérifier le total",`12.0 + 8.0 = 20.0 : vérification d'<b>état</b>.`]]),
+mk("Stub","Réponses programmées à l'avance, écrites en dur, sans vraie logique.",`class StubPriceProvider implements IPriceProvider {
+    public double priceOf(String ref) {
+        return switch (ref) {
+            case "A" -> 12.0;
+            case "B" -> 8.0;
+            default -> 0.0;
+        };
+    }
+}
+
+
+@Test
+void calculeLeTotalAvecDesPrixProgrammes() {
+    IPriceProvider prix = new StubPriceProvider();
+    OrderService service = new OrderService(prix, new DummyNotifier());
+
+    assertEquals(20.0, service.total(List.of("A", "B")));
+}`,[
+[1,"classe Stub",`Un Stub renvoie des réponses prévues d'avance.`],
+[3,"switch expression",`<code>switch</code> utilisé comme expression : renvoie une valeur selon <code>ref</code>.`],
+[4,"cas \"A\"",`<code>-&gt;</code> : si <code>ref</code> vaut "A", la valeur est 12.0.`],
+[6,"cas par défaut",`<code>default</code> : tous les autres cas.`],
+[7,"fermer le switch",`Un <code>switch</code> utilisé comme valeur se termine par <code>};</code>.`],
+[12,"créer le Stub",`Contrairement au Fake, les prix sont fixés dans la classe.`],
+[14,"vérifier l'état",`On ne vérifie pas les appels à <code>priceOf</code> : seulement le total.`]]),
+mk("Spy","Un Stub qui enregistre ses appels : le test consulte le journal après coup.",`class SpyNotifier implements INotifier {
+    private final List<String> messagesEnvoyes = new ArrayList<>();
+
+    public void send(String to, String message) {
+        messagesEnvoyes.add(to + " : " + message);
+    }
+
+    int nombreDeMessages() { return messagesEnvoyes.size(); }
+}
+
+
+@Test
+void confirmerEnvoieUneSeuleNotification() {
+    SpyNotifier spy = new SpyNotifier();
+    INotifier notifier = spy;
+    OrderService service = new OrderService(new StubPriceProvider(), notifier);
+
+    service.confirm("client@example.com", List.of("A", "B"));
+
+    assertEquals(1, spy.nombreDeMessages());
+}`,[
+[1,"classe Spy",`Un Spy enregistre ce qu'il reçoit.`],
+[2,"journal des messages",`Liste des messages reçus. <code>new ArrayList&lt;&gt;()</code> : liste vide (le <code>&lt;&gt;</code> laisse Java deviner le type).`],
+[4,"enregistrer l'appel",`<code>add</code> ajoute à la liste ; <code>+</code> concatène des chaînes.`],
+[6,"API d'observation",`Permet au test de lire le journal après coup.`],
+[10,"garder la référence au Spy",`Le test voit le Spy avec son API d'observation.`],
+[11,"vue du composant testé",`Même objet, mais le composant ne voit que <code>INotifier</code>.`],
+[13,"exécuter",`Déclenche l'envoi d'un message.`],
+[14,"vérifier l'interaction",`Vérification d'<b>interaction</b> faite par le test, après coup : 1 message envoyé.`]]),
+mk("Mock","Attentes posées avant, vérifiées par la doublure elle-même.",`class MockNotifier implements INotifier {
+    private final String emailAttendu, messageAttendu;
+    private boolean appele = false;
+
+    MockNotifier(String emailAttendu, String messageAttendu) {
+        this.emailAttendu = emailAttendu;
+        this.messageAttendu = messageAttendu;
+    }
+
+    public void send(String to, String message) {
+        if (!to.equals(emailAttendu) || !message.equals(messageAttendu))
+            throw new AssertionError("appel inattendu : " + to + " / " + message);
+        appele = true;
+    }
+
+    void verifie() {
+        if (!appele) throw new AssertionError("send() attendu, jamais recu");
+    }
+}
+
+
+@Test
+void confirmerNotifieLeClient() {
+    MockNotifier mock = new MockNotifier("client@example.com", "Commande confirmee : 20.0");
+    INotifier notifier = mock;
+    OrderService service = new OrderService(new StubPriceProvider(), notifier);
+
+    service.confirm("client@example.com", List.of("A", "B"));
+
+    mock.verifie();
+}`,[
+[2,"attentes fixées avant",`Deux <code>String</code> déclarés sur une ligne, séparés par une virgule : ce sont les attentes.`],
+[3,"drapeau d'appel",`<code>boolean</code> : vrai/faux. Passera à <code>true</code> quand l'appel attendu arrive.`],
+[4,"constructeur avec les attentes",`Les attentes sont posées <b>avant</b> l'exécution.`],
+[5,"mémoriser l'email attendu",`<code>this.x = x</code> copie le paramètre dans l'attribut.`],
+[9,"appel imprévu ?",`<code>!</code> : non. <code>||</code> : ou. <code>equals</code> compare le contenu de deux chaînes (jamais <code>==</code>).`],
+[10,"échouer immédiatement",`<code>AssertionError</code> : comme les assertions JUnit, non vérifiée donc sans <code>throws</code>.`],
+[11,"noter l'appel",`L'appel attendu a eu lieu.`],
+[13,"méthode de contrôle",`Appelée par le test en fin de scénario.`],
+[14,"échouer si aucun appel",`Si <code>appele</code> est faux, l'appel attendu n'est jamais arrivé.`],
+[19,"créer le Mock avec ses attentes",`Le test voit le Mock complet (attentes et <code>verifie()</code>).`],
+[23,"déclencher le contrôle",`Vérification d'<b>interaction</b> portée par la doublure elle-même.`]]),
+mk("Gherkin (Cucumber)","Un scénario en langage du métier, dans un fichier .feature : Given (contexte), When (événement), Then (résultat).",`Feature: Confirmation de commande
+
+  Scenario: le client est notifié du montant de sa commande
+    Given un catalogue où A coûte 12.0 et B coûte 8.0
+    When le client "client@example.com" confirme une commande de A et B
+    Then il reçoit un message contenant "20.0"`,[
+[1,"titre de la fonctionnalité",`<b>Feature</b> nomme la fonctionnalité décrite dans le fichier.`],
+[2,"un scénario",`<b>Scenario</b> : un exemple de comportement attendu.`],
+[3,"le contexte initial",`<b>Given</b> : l'état de départ.`],
+[4,"l'événement",`<b>When</b> : l'événement qui se produit.`],
+[5,"le résultat attendu",`<b>Then</b> : le résultat attendu. <b>And</b> et <b>But</b> prolongent une étape.`]],['gherkin']),
+mk("Étapes et lanceur Cucumber","Chaque phrase Gherkin est reliée à une méthode Java ; une suite JUnit lance les scénarios.",`public class ConfirmationSteps {
+    private IPriceProvider prix;
+    private final INotifier notifier = mock(INotifier.class);
+    private String client;
+    @Given("un catalogue où A coûte {double} et B coûte {double}")
+    public void unCatalogue(double prixA, double prixB) {
+        prix = new InMemoryPriceProvider(Map.of("A", prixA, "B", prixB));
+    }
+    @When("le client {string} confirme une commande de A et B")
+    public void confirme(String email) {
+        client = email;
+        new OrderService(prix, notifier).confirm(email, List.of("A", "B"));
+    }
+    @Then("il reçoit un message contenant {string}")
+    public void recoit(String texte) {
+        verify(notifier).send(eq(client), contains(texte));
+    }
+}
+
+
+@Suite
+@IncludeEngines("cucumber")
+@SelectPackages("org.example.commande")
+@ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "org.example.commande")
+class RunCucumberTest {
+}`,[
+[1,"classe des étapes",`Contient les méthodes reliées aux phrases du <code>.feature</code>.`],
+[2,"attribut prix",`Le fournisseur de prix, rempli par l'étape Given.`],
+[3,"doublure Mockito",`Doublure du notifieur partagée par les étapes (rôle Spy).`],
+[4,"mémoriser le client",`L'email du client, pour la vérification finale.`],
+[5,"étape Given",`L'annotation lie la phrase du .feature à la méthode ; <code>{double}</code> : valeur extraite de la phrase.`],
+[6,"méthode de l'étape Given",`Les paramètres reçoivent les valeurs de <code>{double}</code>, dans l'ordre.`],
+[7,"créer le catalogue Fake",`On réutilise le Fake <code>InMemoryPriceProvider</code>.`],
+[9,"étape When",`<code>{string}</code> : texte entre guillemets dans la phrase.`],
+[11,"mémoriser l'email",`Gardé pour l'étape Then.`],
+[12,"exécuter la commande",`Crée le service avec ses dépendances et appelle <code>confirm</code>.`],
+[14,"étape Then",`Relie la phrase du résultat attendu.`],
+[16,"vérifier l'envoi",`Vérification Mockito après coup : un message contenant le texte a été envoyé au client.`],
+[19,"déclarer la suite",`JUnit Platform : regroupe des tests pour que Gradle ou l'IDE les découvrent.`],
+[20,"moteur Cucumber",`Un moteur exécute un type de test : ici les scénarios Gherkin.`],
+[21,"paquetage des scénarios",`Cherche les fichiers <code>.feature</code> dans ce paquetage.`],
+[22,"paquetage des étapes (glue)",`<code>GLUE_PROPERTY_NAME</code> : où Cucumber trouve les méthodes d'étapes (la « glue »).`],
+[23,"classe vide du lanceur",`Corps vide : les annotations suffisent.`]]),
+mk("Couverture : JaCoCo avec Gradle","JaCoCo mesure ce que les tests exécutent. Configuration Gradle en Kotlin, puis commande Bash.",`plugins {
+    jacoco
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+}
+
+
+./gradlew test jacocoTestReport`,[
+[1,"bloc des plugins",`Dans <code>build.gradle.kts</code> : déclare les plugins Gradle.`],
+[2,"activer JaCoCo",`Active le plugin de couverture.`],
+[4,"configurer la tâche test",`<code>tasks.test</code> : la tâche qui lance les tests.`],
+[5,"générer le rapport après les tests",`<code>finalizedBy</code> : le rapport est généré après chaque exécution des tests.`],
+[7,"configurer la tâche de rapport",`La tâche qui produit le rapport de couverture.`],
+[8,"dépendre des tests",`<code>dependsOn</code> : le rapport a besoin que les tests aient tourné.`],
+[10,"lancer tests et rapport",`Commande Bash. Rapport HTML : <code>build/reports/jacoco/test/html/index.html</code>.`]],['java','plain'])
+];
+D=[D[0],D[1],D[2],D[3],N[0],N[1],N[2],N[3],N[4],N[5],D[4],D[5],N[6],N[7],N[8]];
+D.forEach(function(m,i){m[0]=(i+1)+'. '+m[0].replace(/^\d+\.\s*/,'')});
+var S={L:0,I:0,M:'line'},ph='study',rec=null,ans='',ok=false,K='ctaq-quiz2';
+try{var s=JSON.parse(localStorage.getItem(K));if(s&&D[s.L])S=s}catch(e){}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return'&#'+c.charCodeAt(0)+';'})}
+function norm(t){return t.trim().replace(/\s+/g,' ')}
+function diff(a,b){var n=a.length,m=b.length,d=[],i,j;for(i=0;i<=n;i++)d.push(new Array(m+1).fill(0));
+for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)d[i][j]=a[i]==b[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+var A='',B='',mi=0,ex=0;i=0;j=0;
+while(i<n||j<m){if(i<n&&j<m&&a[i]==b[j]){A+=esc(a[i]);B+=esc(b[j]);i++;j++}
+else if(j>=m||(i<n&&d[i+1][j]>=d[i][j+1])){A+='<mark class="m">'+esc(a[i])+'</mark>';mi++;i++}
+else{B+='<mark class="x">'+esc(b[j])+'</mark>';ex++;j++}}return[A,B,mi,ex]}
+function go(p){ph=p;render()}
+function jump(v){S={L:+v,I:0};rec=null;ans='';ph='study';save();render()}
+function check(){var l=D[S.L][2][rec?rec.j:S.I];ans=document.getElementById('a').value;ok=norm(ans)==norm(l[1]);ph='res';render()}
+function again(){go('type')}
+function nxt(){var n=D[S.L][2].length;
+if(!rec&&((S.I+1)%3==0||S.I==n-1)){rec={j:S.I>0?Math.floor(Math.random()*S.I):0};ans='';ph='type';render();return}
+rec=null;ans='';S.I++;if(S.I>=n){S.I=0;S.L++}ph='study';save();render()}
+function restart(){jump(0)}
+function render(){
+var sel=document.getElementById('sel');
+if(!sel.options.length)D.forEach(function(x,i){sel.add(new Option(x[0],i))});
+var tot=0,pre=0;D.forEach(function(x,i){tot+=x[2].length;if(i<S.L)pre+=x[2].length});
+var h='',app=document.getElementById('app');
+if(S.L>=D.length){document.getElementById('pb').style.width='100%';document.getElementById('pt').textContent=tot+' / '+tot+' lignes';
+app.innerHTML='<p class="k">Terminé</p><p>Bravo : tu as réécrit de mémoire les '+tot+' lignes du parcours. Pour consolider, recommence dans quelques jours.</p><button onclick="restart()">Recommencer</button>';return}
+sel.value=S.L;var L=D[S.L],n=L[2].length;
+document.getElementById('pb').style.width=((pre+S.I)/tot*100)+'%';
+document.getElementById('pt').textContent=L[0]+' · ligne '+(S.I+1)+' / '+n+' · '+(pre+S.I)+' / '+tot+' au total';
+var l=L[2][rec?rec.j:S.I];
+if(ph=='study'){
+h=(S.I==0?'<p class="sm">'+L[1]+'</p>':'')+'<p class="k">Étape 1 · Lis et comprends</p><pre>'+esc(l[1])+'</pre><div>'+l[2]+'</div>'+(l[3]?'<p class="tip">À retenir : '+l[3]+'</p>':'')+'<button onclick="go(\'type\')">Je suis prêt : me tester</button>'}
+else if(ph=='type'){
+h='<p class="k">'+(rec?'Petit rappel · une ligne vue plus tôt':'Étape 2 · De mémoire')+'</p><p>Réécris exactement la ligne : <b>'+l[0]+'</b></p><input id="a" value="'+esc(ans)+'" autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==\'Enter\')check()"><button onclick="check()">Vérifier</button>'+(rec?'':'<button class="s" onclick="go(\'study\')">Revoir l\'explication</button>')}
+else{
+if(ok)h='<div class="res ok"><b>Exact.</b> Ligne mémorisée.</div><pre>'+esc(l[1])+'</pre><button onclick="nxt()">'+(rec?'Continuer':'Ligne suivante')+'</button>';
+else{var d=diff(norm(l[1]),norm(ans));
+h='<div class="res ko"><b>Pas tout à fait.</b> '+d[2]+' caractère(s) manquant(s), '+d[3]+' en trop.</div><p class="sm">Attendu (surligné : ce qui manquait)</p><pre>'+d[0]+'</pre><p class="sm">Ta réponse (barré : en trop)</p><pre>'+d[1]+'</pre>'+(rec?'<p>'+l[2]+'</p><button onclick="nxt()">Continuer</button>':'<button onclick="again()">Réessayer</button><button class="s" onclick="go(\'study\')">Revoir l\'explication</button>')}}
+app.innerHTML=h;var a=document.getElementById('a');if(a)a.focus()}
+var KB=/^(class|interface|public|private|protected|static|final|void|new|implements|extends|import|package|double|int|boolean|true|false|null|throws|var|val|fun)$/,KC=/^(return|if|else|for|while|switch|case|default|throw|try|catch)$/,EL='java',RS='';
+function sp(c,t){return'<span class="t-'+c+'">'+esc(t)+'</span>'}
+function hl(src,lang){
+if(lang=='gherkin')return src.split('\n').map(function(l){var m=l.match(/^(\s*)(Feature|Scenario|Given|When|Then|And|But)(:?)(.*)$/);return m?esc(m[1])+sp('k',m[2]+m[3])+hl(m[4],'plain'):hl(l,'plain')}).join('\n');
+var re=/(\/\/.*|#.*)|("(?:\\.|[^"\\])*"?)|(@\w+)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)(\s*\()?|([\s\S])/g,o='',m,k;
+while((m=re.exec(src))){
+if(m[1])o+=sp('c',m[1]);else if(m[2])o+=sp('s',m[2]);
+else if(m[3])o+=lang=='plain'?esc(m[3]):sp('a',m[3]);
+else if(m[4])o+=sp('n',m[4]);
+else if(m[5]){if(lang=='plain')o+=esc(m[5]+(m[6]||''));else{k=KB.test(m[5])?'k':KC.test(m[5])?'g':m[6]?'f':/^[A-Z]/.test(m[5])?'y':'v';o+=sp(k,m[5])+esc(m[6]||'')}}
+else o+=esc(m[7])}
+return o}
+function ops(a,b){var n=a.length,m=b.length,d=[],i,j,r=[];for(i=0;i<=n;i++)d.push(new Array(m+1).fill(0));
+for(i=n-1;i>=0;i--)for(j=m-1;j>=0;j--)d[i][j]=a[i]==b[j]?d[i+1][j+1]+1:Math.max(d[i+1][j],d[i][j+1]);
+i=0;j=0;while(i<n||j<m){if(i<n&&j<m&&a[i]==b[j]){r.push(['=',i,j]);i++;j++}else if(j>=m||(i<n&&d[i+1][j]>=d[i][j+1])){r.push(['-',i,-1]);i++}else{r.push(['+',-1,j]);j++}}return r}
+function cmpB(code,got,lang){
+var E=code.split('\n').filter(function(l){return l.trim()}),G=got.split('\n').map(sc).filter(function(l){return l.trim()&&!/^\s*(\/\/|#)/.test(l)}),en=E.map(norm),gn=G.map(norm),o=ops(en,gn),h='',bad=0,k=0,q,t,A,B,d;
+while(k<o.length){
+if(o[k][0]=='='){h+='<div class="ln">'+hl(E[o[k][1]],lang)+'</div>';k++;continue}
+A=[];B=[];while(k<o.length&&o[k][0]!='='){(o[k][0]=='-'?A:B).push(o[k]);k++}
+t=Math.max(A.length,B.length);
+for(q=0;q<t;q++){bad++;
+if(A[q]&&B[q]){d=diff(en[A[q][1]],gn[B[q][2]]);h+='<div class="ln ko"><div>'+d[0]+'</div><div class="you">'+d[1]+'</div></div>'}
+else if(A[q])h+='<div class="ln ko"><div><mark class="m">'+esc(E[A[q][1]])+'</mark></div><div class="you">ligne manquante</div></div>';
+else h+='<div class="ln ko"><div><mark class="x">'+esc(G[B[q][2]])+'</mark></div><div class="you">ligne en trop</div></div>'}}
+return[h,bad]}
+function BL(L){return L.B||[[L[0],L[2].map(function(l){return l[1]}).join('\n')]]}
+function hint(c){return c.split('\n').filter(function(l){return l.trim()}).map(function(l){return l.slice(0,l.search(/\S/))+l.trim().split(/[\s(]/)[0]+' ...'}).join('\n')}
+function ed(v,r){return'<div class="ed"><pre id="hl" aria-hidden="true"></pre><textarea id="a" rows="'+r+'" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" onkeydown="kd(event)" oninput="up()" onscroll="document.getElementById(\'hl\').scrollLeft=this.scrollLeft">'+esc(v)+'</textarea></div>'}
+function up(){var t=document.getElementById('a'),p=document.getElementById('hl');p.innerHTML=hl(t.value,EL)+'\n';t.style.height='auto';t.style.height=t.scrollHeight+'px';p.scrollLeft=t.scrollLeft}
+function ins(x){var t=document.getElementById('a'),s=t.selectionStart;t.value=t.value.slice(0,s)+x+t.value.slice(t.selectionEnd);t.selectionStart=t.selectionEnd=s+x.length;up()}
+function kd(e){var t=e.target,s=t.selectionStart,v=t.value,ln,ind;
+if(e.key=='Enter'&&(S.M!='block'||e.ctrlKey||e.metaKey)){e.preventDefault();check();return}
+if(e.key=='Tab'){e.preventDefault();var ls=v.lastIndexOf('\n',s-1)+1,le=v.indexOf('\n',s);if(le<0)le=v.length;var cl=v.slice(ls,le);if(/^\s*(\/\/|#)/.test(cl)){var id=cl.match(/^\s*/)[0];t.value=v.slice(0,ls)+id+v.slice(le);t.selectionStart=t.selectionEnd=ls+id.length;up()}else ins('    ');return}
+if(e.key=='Enter'){ln=v.slice(v.lastIndexOf('\n',s-1)+1,s);ind=ln.match(/^\s*/)[0];if(/\{\s*$/.test(ln))ind+='    ';e.preventDefault();ins('\n'+ind)}}
+function setM(m){S.M=m;S.I=0;rec=null;ans='';ph='study';save();render()}
+function jump(v){S={L:+v,I:0,M:S.M};rec=null;ans='';ph='study';save();render()}
+function check(){var a=document.getElementById('a'),bm=S.M=='block',L=D[S.L],o=(bm?BL(L):L[2])[rec?rec.j:S.I];ans=a.value;
+if(bm){RS=cmpB(o[1],ans,o[2]||'java');ok=!RS[1]}else ok=norm(ans)==norm(o[1]);ph='res';render()}
+function nxt(){var bm=S.M=='block',n=(bm?BL(D[S.L]):D[S.L][2]).length;
+if(!bm&&!rec&&((S.I+1)%3==0||S.I==n-1)){rec={j:S.I>0?Math.floor(Math.random()*S.I):0};ans='';ph='type';render();return}
+rec=null;ans='';S.I++;if(S.I>=n){S.I=0;S.L++}ph='study';save();render()}
+function render(){
+var sel=document.getElementById('sel');
+if(sel.options.length!=D.length){sel.innerHTML='';D.forEach(function(x,i){sel.add(new Option(x[0],i))})}
+var bm=S.M=='block',U=function(L){return bm?BL(L):L[2]},tot=0,pre=0,h='',app=document.getElementById('app');
+document.getElementById('ml').className=bm?'s':'';document.getElementById('mb').className=bm?'':'s';
+D.forEach(function(x,i){var c=U(x).length;tot+=c;if(i<S.L)pre+=c});
+if(S.L>=D.length){document.getElementById('pb').style.width='100%';document.getElementById('pt').textContent=tot+' / '+tot;app.innerHTML='<p class="k">Terminé</p><p>Bravo, parcours complet réussi. Recommence dans quelques jours ou change de mode pour consolider.</p><button onclick="restart()">Recommencer</button>';return}
+sel.value=S.L;var L=D[S.L],it=U(L),n=it.length,o=it[rec?rec.j:S.I],c=bm?o[1]:o[1].trim(),g=bm?(o[2]||'java'):(o[4]||'java');
+document.getElementById('pb').style.width=((pre+S.I)/tot*100)+'%';
+document.getElementById('pt').textContent=L[0]+' · '+(bm?'bloc ':'ligne ')+(S.I+1)+' / '+n+' · '+(pre+S.I)+' / '+tot+' au total';
+if(ph=='qcm')h=qcmH();else if(ph=='study'){h=(S.I==0?'<p class="sm">'+L[1]+'</p>':'')+'<p class="k">Étape 1 · '+(bm?o[0]:'Lis et comprends')+'</p><pre class="code">'+hl(c,g)+'</pre>'+(bm?'<p class="sm">Chaque ligne est expliquée dans le mode « Ligne par ligne ».</p>':'<div>'+o[2]+'</div>'+(o[3]?'<p class="tip">À retenir : '+o[3]+'</p>':''))+'<button onclick="go(\'type\')">Je suis prêt : me tester</button>'}
+else if(ph=='type'){EL=g;var rw=bm?c.split('\n').filter(function(l){return l.trim()}).length+1:1;
+h='<p class="k">'+(rec?'Petit rappel · une ligne vue plus tôt':'Étape 2 · De mémoire')+'</p><p>'+(bm?'Réécris tout le bloc : ':'Réécris exactement la ligne : ')+'<b>'+o[0]+(!bm&&dn(c)?' (nom : <code>'+dn(c)+'</code>)':'')+'</b></p>'+ed(bm&&!ans?skel(L,c,g):ans,rw)+'<button onclick="check()">Vérifier</button>'+(rec?'':'<button class="s" onclick="go(\'study\')">Revoir</button>')+(bm?'<button class="s" onclick="var e=document.getElementById(\'hn\');e.hidden=!e.hidden">Indice</button><pre class="code" id="hn" hidden>'+esc(hint(c))+'</pre><p class="sm">Entrée : nouvelle ligne · Ctrl+Entrée : vérifier · les commentaires // sont des repères : clique sur un repère, appuie sur Tab pour effacer le commentaire, puis écris ta ligne</p>':'<p class="sm">Entrée : vérifier</p>')}
+else if(ok){h='<div class="res ok"><b>Exact.</b> '+(bm?'Bloc réussi.':'Ligne mémorisée.')+'</div><pre class="code">'+hl(c,g)+'</pre><button onclick="nxt()">'+(rec?'Continuer':bm?'Bloc suivant':'Ligne suivante')+'</button>'}
+else if(bm){h='<div class="res ko"><b>Pas tout à fait.</b> '+RS[1]+' ligne(s) à corriger.</div><div class="lns">'+RS[0]+'</div><button onclick="go(\'type\')">Réessayer</button><button class="s" onclick="go(\'study\')">Revoir le code</button>'}
+else{var d=diff(norm(c),al(c,ans));h='<div class="res ko"><b>Pas tout à fait.</b> '+d[2]+' caractère(s) manquant(s), '+d[3]+' en trop.</div><p class="sm">Attendu (surligné : ce qui manquait)</p><pre class="code">'+d[0]+'</pre><p class="sm">Ta réponse (barré : en trop)</p><pre class="code">'+d[1]+'</pre>'+(rec?'<p>'+o[2]+'</p><button onclick="nxt()">Continuer</button>':'<button onclick="go(\'type\')">Réessayer</button><button class="s" onclick="go(\'study\')">Revoir l\'explication</button>')}
+app.innerHTML=h;if(ph=='type'){up();document.getElementById('a').focus()}}
+var qm={i:0,s:0,p:-1};
+var QZ={
+0:[[`Dans <code>org.junit.jupiter.api.Test</code>, que désigne <code>jupiter</code> ?`,['Le lanceur de tests','Le modèle de programmation de JUnit 5 (annotations)','Le moteur des anciens tests JUnit 4'],1,`Jupiter est le modèle de programmation de JUnit 5. Le lanceur, c'est la Platform ; JUnit 4 correspond à Vintage.`],
+[`Que fait <code>static</code> dans <code>import static ...Assertions.*;</code> ?`,['Il importe les méthodes statiques pour les appeler sans préfixe','Il rend la classe immuable','Il importe une seule méthode'],0,`On écrit <code>assertEquals(...)</code> au lieu de <code>Assertions.assertEquals(...)</code>.`]],
+1:[[`Dans <code>assertEquals(135.0, resultat, 0.001)</code>, à quoi sert 0.001 ?`,[`Au message d'échec`,'À la tolérance sur les double',`Au nombre d'essais`],1,`Les <code>double</code> sont approximatifs : on accepte un écart de 0.001.`],
+[`Quel est l'ordre des deux premiers paramètres de <code>assertEquals</code> ?`,['obtenu, attendu','attendu, obtenu',`L'ordre n'a pas d'importance`],1,`L'attendu vient en premier, sinon le message d'échec est trompeur.`]],
+2:[[`Quand s'exécute une méthode <code>@BeforeEach</code> ?`,['Une fois avant toute la classe','Avant chaque test','Après chaque test'],1,`<code>@BeforeEach</code> : avant chaque test. <code>@BeforeAll</code> : une seule fois (méthode static).`],
+[`Pourquoi reconstruire la fixture avant chaque test ?`,['Pour que les tests soient indépendants','Pour aller plus vite',`Parce que Java l'impose`],0,`Chaque test part d'un état neuf : aucun ne dépend d'un autre.`]],
+3:[[`Quelle assertion vérifie le contenu d'une liste sans tenir compte de l'ordre ?`,['hasSize(2)',`containsInAnyOrder('B', 'A')`,`hasItem('A')`],1,`<code>containsInAnyOrder</code> : exactement ces éléments, ordre indifférent.`],
+[`Quelle bibliothèque fournit <code>assertThat</code> ?`,['JUnit Jupiter','Hamcrest','Mockito'],1,`Pas d'<code>assertThat</code> dans Jupiter : il vient de Hamcrest.`]],
+4:[[`Pourquoi <code>OrderService</code> reçoit ses dépendances par le constructeur ?`,['Pour pouvoir les remplacer par des doublures','Pour les rendre privées','Pour accélérer le code'],0,`Cette injection permet de substituer des doublures pendant les tests.`]],
+5:[[`Que se passe-t-il si un Dummy est appelé ?`,['Il renvoie 0','Le test échoue (exception)',`Il enregistre l'appel`],1,`Il lève une exception : il ne devait jamais être utilisé.`]],
+6:[[`Qu'est-ce qui distingue un Fake d'un Stub ?`,['Il a une vraie logique simplifiée (catalogue en mémoire)','Il vérifie les appels','Il ne répond à rien'],0,`Le Fake fonctionne vraiment en plus léger ; le Stub renvoie des valeurs écrites en dur.`]],
+7:[[`Un Stub sert à quelle vérification ?`,[`D'état (le résultat obtenu)`,`D'interaction, faite par la doublure`,'Aucune'],0,`Il fournit des entrées ; on vérifie le résultat, pas les appels reçus.`]],
+8:[[`Qui vérifie les appels reçus avec un Spy ?`,['La doublure elle-même','Le test, après coup','Personne'],1,`Le test consulte le journal du Spy après l'exécution.`]],
+9:[[`Qu'est-ce qui distingue un Mock d'un Spy ?`,['Le Mock est plus rapide',`Le Mock vérifie lui-même, d'après des attentes posées avant`,'Le Mock ne répond jamais'],1,`Spy : le test vérifie après. Mock : la doublure vérifie à partir d'attentes préalables.`]],
+10:[[`Que fait <code>when(prix.priceOf('A')).thenReturn(12.0)</code> ?`,[`Il vérifie un appel`,'Il programme une réponse (rôle Stub)','Il crée la doublure'],1,`Il se lit : quand on appelle <code>priceOf</code> avec A, renvoie 12.0.`],
+[`Que sont <code>eq(...)</code> et <code>contains(...)</code> dans un <code>verify</code> ?`,[`Des matchers d'arguments Mockito`,'Des assertions JUnit','Des méthodes de OrderService'],0,`Si un argument est un matcher, tous les arguments de l'appel doivent en être.`]],
+11:[[`Quel est l'ordre des trois temps d'EasyMock ?`,['verify, replay, record','record, replay, verify','replay, record, verify'],1,`Enregistrement, rejeu (<code>replay</code>), puis vérification (<code>verify</code>).`]],
+12:[[`Que décrit <code>Given</code> dans un scénario ?`,['Le résultat attendu',`L'événement`,'Le contexte initial'],2,`Given : contexte ; When : événement ; Then : résultat attendu.`]],
+13:[[`À quoi sert <code>@IncludeEngines('cucumber')</code> ?`,['À importer Cucumber','À utiliser le moteur Cucumber dans la suite JUnit','À créer des doublures'],1,`Un moteur exécute un type de test : ici, les scénarios Gherkin.`]],
+14:[[`Que garantit 100 % de couverture ?`,['Aucun défaut','Que tout le code a été exécuté','Que les tests sont bien écrits'],1,`Un code exécuté n'est pas pour autant correctement vérifié.`],
+[`Que fait <code>finalizedBy(tasks.jacocoTestReport)</code> ?`,['Il génère le rapport après les tests','Il lance JaCoCo avant les tests','Il supprime le rapport'],0,`Le rapport est produit après chaque exécution des tests.`]]
+};
+function qcmH(){var Q=QZ[S.L],q=Q[qm.i],a=qm.p>=0,h='<p class="k">Quiz · question '+(qm.i+1)+' / '+Q.length+' · score '+qm.s+'</p><p class="qq">'+q[0]+'</p>';
+q[1].forEach(function(t,k){var c='opt';if(a){if(k==q[2])c+=' good';else if(k==qm.p)c+=' bad'}h+='<button class="'+c+'" '+(a?'disabled':'onclick="pick('+k+')"')+'><b>'+'ABCD'[k]+'</b><span>'+t+'</span></button>'});
+if(a)h+='<div class="res '+(qm.p==q[2]?'ok':'ko')+'"><b>'+(qm.p==q[2]?'Correct.':'Pas tout à fait.')+'</b> '+q[3]+'</div><button onclick="qn()">'+(qm.i+1<Q.length?'Question suivante':'Continuer')+'</button>';
+return h}
+function pick(k){qm.p=k;if(k==QZ[S.L][qm.i][2])qm.s++;render()}
+function qn(){var Q=QZ[S.L];if(qm.i+1<Q.length){qm.i++;qm.p=-1}else{S.I=0;S.L++;ph='study';save()}render()}
+function nxt(){var bm=S.M=='block',n=(bm?BL(D[S.L]):D[S.L][2]).length;
+if(!bm&&!rec&&((S.I+1)%3==0||S.I==n-1)){rec={j:S.I>0?Math.floor(Math.random()*S.I):0};ans='';ph='type';render();return}
+rec=null;ans='';S.I++;
+if(S.I>=n){if(QZ[S.L]){S.I=n-1;qm={i:0,s:0,p:-1};ph='qcm';render();return}S.I=0;S.L++}
+ph='study';save();render()}
+function seg(){var h='';D.forEach(function(m,i){h+='<i class="'+(i<S.L?'d':i==S.L?'c':'')+'" title="'+esc(m[0])+'" onclick="jump('+i+')"></i>'});document.getElementById('seg').innerHTML=h}
+function skel(L,c,lang){var m={},cm=(lang=='gherkin'||lang=='plain')?'#':'//';L[2].forEach(function(l){m[l[1].trim()]=l[0]});
+return c.split('\n').filter(function(l){return l.trim()}).map(function(l){var t=l.trim();return l.slice(0,l.search(/\S/))+cm+' '+(m[t]||(/^[})\];,]+$/.test(t)?'fermer le bloc':'...'))}).join('\n')}
+function sc(l){var m=l.match(/^(.*?)\s+\/\/.*$/);return m&&(m[1].match(/"/g)||[]).length%2==0?m[1]:l}
+function mkI(IB){var L=[],B=[];IB.forEach(function(b){var cs=[];b[4].forEach(function(n,k){var c='import '+(b[2]?'static ':'')+b[1]+'.'+n[0]+';',p=(b[1]+'.'+n[0]).split('.'),la=p.pop();cs.push(c);L.push(['importer '+(la=='*'?'tout '+p.pop():la),c,(k==0?b[3]+' ':'')+n[1]+' <span class="sm">('+b[1]+')</span>','','java'])});B.push([b[0],cs.join('\n'),'java'])});
+var m=['1. Les imports','Tous les imports du cours, regroupés par bibliothèque. Les slides ne les affichent pas : ils sont déduits des paquetages et des annotations cités.',L];m.B=B;return m}
+D[0]=mkI([
+['JUnit Jupiter : tests et cycle de vie','org.junit.jupiter.api',0,`<b>org</b> : domaine inversé de l'organisation. <b>junit</b> : le framework. <b>jupiter</b> : le modèle de programmation de JUnit 5. <b>api</b> : la partie publique.`,[
+['Test',`marque une méthode de test.`],
+['BeforeEach',`méthode exécutée avant chaque test (fixture).`],
+['AfterEach',`méthode exécutée après chaque test.`],
+['BeforeAll',`méthode statique exécutée une fois avant tous les tests.`],
+['AfterAll',`méthode statique exécutée une fois après tous les tests.`],
+['DisplayName',`nom lisible d'un test dans les rapports.`],
+['Disabled',`désactive un test (en disant pourquoi).`],
+['Tag',`étiquette pour n'exécuter qu'une catégorie de tests.`],
+['Timeout',`fait échouer un test trop long.`],
+['TestMethodOrder',`impose un ordre d'exécution des tests.`],
+['MethodOrderer',`contient les stratégies d'ordre, comme <code>MethodOrderer.OrderAnnotation</code>.`],
+['Order',`numéro d'ordre d'un test, utilisé avec <code>OrderAnnotation</code>.`]]],
+['JUnit Jupiter : tests paramétrés','org.junit.jupiter.params',0,`<b>params</b> : module <code>junit-jupiter-params</code>, pour les tests paramétrés.`,[
+['ParameterizedTest',`un même test exécuté sur plusieurs jeux de valeurs.`],
+['provider.ValueSource',`liste de valeurs fournies au test paramétré (<b>provider</b> : les fournisseurs de valeurs).`]]],
+['JUnit Jupiter : assertions','org.junit.jupiter.api.Assertions',1,`<b>static</b> : importe des méthodes statiques, appelables sans écrire <code>Assertions.</code> devant. <b>*</b> : toutes d'un coup.`,[
+['*',`toutes les assertions.`],
+['assertEquals',`attendu en premier, obtenu ensuite (avec tolérance pour les double).`],
+['assertTrue',`la condition doit être vraie.`],
+['assertFalse',`la condition doit être fausse.`],
+['assertNull',`la valeur doit être null.`],
+['assertNotNull',`la valeur ne doit pas être null.`],
+['assertThrows',`vérifie qu'un appel lève une exception.`],
+['assertAll',`regroupe plusieurs vérifications, toutes évaluées même si l'une échoue.`]]],
+['JUnit Platform : suites','org.junit.platform.suite.api',0,`<b>platform</b> : le socle JUnit Platform qui découvre et lance les tests (Jupiter est un moteur posé dessus). <b>suite.api</b> : regrouper des classes (bibliothèque <code>junit-platform-suite</code>).`,[
+['Suite',`déclare une classe qui regroupe des tests.`],
+['SelectClasses',`liste les classes de tests de la suite.`],
+['SelectPackages',`sélectionne tous les tests d'un paquetage.`],
+['IncludeEngines',`choisit le moteur d'exécution (ex. cucumber).`],
+['ConfigurationParameter',`passe un paramètre de configuration à la suite.`]]],
+['Hamcrest','org.hamcrest',1,`<b>org.hamcrest</b> : la bibliothèque Hamcrest. <code>assertThat</code> n'existe pas dans JUnit Jupiter.`,[
+['MatcherAssert.assertThat',`assertion générique : une valeur et un matcher.`],
+['Matchers.*',`tous les matchers d'un coup.`],
+['Matchers.is',`égalité (comme <code>equalTo</code>).`],
+['Matchers.equalTo',`égalité.`],
+['Matchers.containsInAnyOrder',`exactement ces éléments, ordre indifférent.`],
+['Matchers.hasSize',`taille d'une collection.`],
+['Matchers.hasItem',`présence d'un élément.`],
+['Matchers.startsWith',`préfixe d'une chaîne.`],
+['Matchers.not',`négation d'un matcher.`],
+['Matchers.allOf',`conjonction : tous les matchers doivent réussir.`],
+['Matchers.anyOf',`disjonction : au moins un matcher réussit.`],
+['Matchers.both',`forme <code>both(m1).and(m2)</code>.`],
+['Matchers.either',`forme <code>either(m1).or(m2)</code>.`]]],
+['Mockito','org.mockito',1,`<b>org.mockito</b> : le framework Mockito.`,[
+['Mockito.*',`mock, when, verify, never, times, spy… ainsi que les matchers any, eq, contains.`],
+['Mockito.mock',`crée une doublure.`],
+['Mockito.when',`programme une réponse (Stub) avec <code>thenReturn</code>.`],
+['Mockito.verify',`vérifie un appel après coup (Spy).`],
+['Mockito.times',`nombre d'appels attendu : <code>verify(m, times(n))</code>.`],
+['Mockito.never',`aucun appel attendu.`],
+['Mockito.spy',`enrobe un objet réel existant.`],
+['ArgumentMatchers.any',`matcher : n'importe quel argument.`],
+['ArgumentMatchers.eq',`matcher : argument égal à une valeur.`],
+['ArgumentMatchers.contains',`matcher : texte contenant une sous-chaîne.`]]],
+['EasyMock','org.easymock.EasyMock',1,`<b>org.easymock</b> : le framework EasyMock. Mêmes noms que Mockito : ne pas importer les deux dans un même fichier.`,[
+['*',`mock, expect, replay, verify… d'un coup.`],
+['mock',`crée la doublure (mode enregistrement).`],
+['expect',`enregistre un appel attendu et sa réponse (<code>andReturn</code>).`],
+['replay',`fin de l'enregistrement : passe en mode rejeu.`],
+['verify',`la doublure vérifie que tous les appels attendus ont eu lieu.`],
+['niceMock',`variante tolérante aux appels non attendus.`],
+['strictMock',`variante qui vérifie aussi l'ordre des appels.`]]],
+['Cucumber','io.cucumber.java.en',0,`<b>io.cucumber</b> : le projet Cucumber. <b>java.en</b> : annotations d'étapes en anglais (dépendance <code>cucumber-java</code>).`,[
+['Given',`étape de contexte initial.`],
+['When',`étape d'événement.`],
+['Then',`étape de résultat attendu.`]]],
+['Cucumber : configuration','io.cucumber.junit.platform.engine.Constants',1,`<b>cucumber-junit-platform-engine</b> : le moteur Cucumber pour JUnit Platform.`,[
+['GLUE_PROPERTY_NAME',`clé du paramètre indiquant où trouver les étapes (la « glue »).`]]],
+['Java : collections','java.util',0,`<b>java.util</b> : bibliothèque standard de Java (pas de <code>org</code> ici).`,[
+['List',`interface de liste (<code>List.of(...)</code>).`],
+['Map',`dictionnaire clé → valeur (<code>Map.of(...)</code>).`],
+['ArrayList',`implémentation de liste (utilisée par le Spy).`]]]
+]);
+D[2][2].push([`exécuter une fois avant tous les tests`,'@BeforeAll',`Méthode exécutée <b>une seule fois</b> avant tous les tests de la classe. Elle doit être <code>static</code>.`],
+[`méthode de préparation globale`,'static void avantTout() {',`<b>static</b> : appartient à la classe et non à une instance (obligatoire pour <code>@BeforeAll</code>).`],
+[`exécuter après chaque test`,'@AfterEach',`Nettoyage exécuté après chaque test.`],
+[`exécuter une fois après tous les tests`,'@AfterAll',`Nettoyage final, une seule fois ; méthode <code>static</code> aussi.`]);
+D[2].B.push(['Cycle de vie complet',`@BeforeAll\nstatic void avantTout() {\n}\n\n@AfterAll\nstatic void apresTout() {\n}\n\n@AfterEach\nvoid nettoyer() {\n}`,'java']);
+var M1=mk("Ordre d'exécution et suites","On peut imposer un ordre avec @Order et regrouper des classes dans une suite. Les slides ne font que nommer ces annotations : voici leur syntaxe JUnit 5 standard.",`@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class OrdreTest {
+    @Test
+    @Order(1)
+    void premier() {
+    }
+
+    @Test
+    @Order(2)
+    void deuxieme() {
+    }
+}
+
+
+@Suite
+@SelectClasses({DiscountTest.class, OrderServiceTest.class})
+class ToutesLesSuites {
+}
+
+
+@Suite
+@SelectPackages("org.example.commande")
+class SuiteDuPaquetage {
+}`,[
+[1,"imposer l'ordre d'exécution",`<code>@TestMethodOrder</code> choisit comment JUnit ordonne les tests. <code>MethodOrderer.OrderAnnotation.class</code> : l'ordre vient des annotations <code>@Order</code>.`,`en avoir besoin signale souvent une dépendance cachée entre tests. Autres ordres : <code>MethodName</code>, <code>DisplayName</code>, <code>Random</code>.`],
+[2,"classe de tests ordonnés",`Une classe de tests classique, ordonnée par l'annotation au-dessus.`],
+[4,"premier test à exécuter",`<code>@Order(1)</code> : les numéros les plus petits passent en premier.`],
+[5,"méthode du test n°1",`Une méthode de test est <code>void</code> et sans paramètre.`],
+[8,"deuxième test",`<code>@Order(2)</code> passe après le 1.`],
+[12,"déclarer une suite",`<code>@Suite</code> : cette classe regroupe des tests à lancer ensemble.`],
+[13,"sélectionner des classes",`<code>@SelectClasses({...})</code> : liste de classes de tests ; les accolades forment un tableau ; <code>.class</code> désigne un type.`],
+[16,"déclarer une autre suite",`Même annotation, autre sélection.`],
+[17,"sélectionner un paquetage",`<code>@SelectPackages(...)</code> : tous les tests de ce paquetage.`]]),
+M2=mk("Pour aller plus loin : annotations utiles","Les annotations citées dans la slide « Pour aller plus loin », avec leur syntaxe JUnit 5 standard.",`@DisplayName("Remise de 10 % au-delà de 100")
+@Test
+void appliqueDixPourCent() {
+}
+
+
+@Disabled("bug connu, voir ticket 42")
+@Test
+void testDesactive() {
+}
+
+
+@Tag("lent")
+@Test
+void testEtiquete() {
+}
+
+
+@Timeout(2)
+@Test
+void testAvecLimiteDeTemps() {
+}
+
+
+@ParameterizedTest
+@ValueSource(doubles = {150.0, 200.0})
+void appliqueUneRemise(double montant) {
+}`,[
+[1,"nom lisible du test",`<code>@DisplayName</code> : le texte affiché dans les rapports à la place du nom de méthode.`],
+[5,"désactiver un test",`<code>@Disabled</code> : le test n'est pas exécuté ; on donne la raison entre guillemets.`],
+[9,"étiqueter un test",`<code>@Tag</code> : permet de ne lancer qu'une catégorie (filtrage dans Gradle).`],
+[13,"limiter la durée",`<code>@Timeout(2)</code> : le test échoue au-delà de 2 secondes (boucle infinie, attente bloquée).`],
+[17,"test paramétré",`<code>@ParameterizedTest</code> remplace <code>@Test</code> : la méthode est exécutée plusieurs fois.`],
+[18,"fournir les valeurs",`<code>@ValueSource</code> : la liste des valeurs, une par exécution.`],
+[19,"méthode avec paramètre",`Elle reçoit la valeur courante : <code>double montant</code>.`]]);
+D.splice(3,0,M1,M2);
+var Z={};Object.keys(QZ).forEach(function(k){Z[+k>=3?+k+2:+k]=QZ[k]});QZ=Z;
+QZ[3]=[[`Quelle annotation donne sa place à un test avec <code>OrderAnnotation</code> ?`,['@Order(1)','@Sort(1)','@First'],0,`<code>@Order(n)</code> : les plus petits numéros s'exécutent en premier.`]];
+QZ[4]=[[`Quelle annotation fait échouer un test qui dure trop longtemps ?`,['@Disabled','@Timeout','@Tag'],1,`<code>@Timeout</code> : échec au-delà de la durée fixée. <code>@Disabled</code> désactive, <code>@Tag</code> étiquette.`]];
+D.forEach(function(m,i){m[0]=(i+1)+'. '+m[0].replace(/^\d+\.\s*/,'')});
+K='ctaq-quiz3';S={L:0,I:0,M:'line'};try{var s3=JSON.parse(localStorage.getItem(K));if(s3&&D[s3.L])S=s3}catch(e){}
+D[0][2].splice(12,0,[`importer OrderAnnotation (style court)`,'import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;',`Importe la classe interne <code>OrderAnnotation</code> directement : on écrit <code>@TestMethodOrder(OrderAnnotation.class)</code> (style court). Avec <code>import ...MethodOrderer;</code> on écrit <code>MethodOrderer.OrderAnnotation.class</code> (style long).`,'','java']);
+D[0].B[0][1]+='\nimport org.junit.jupiter.api.MethodOrderer.OrderAnnotation;';
+D[0][2].forEach(function(l){if(l[1]=='import static org.junit.jupiter.api.Assertions.*;')l[3]=`dans ton résumé, cet import est écrit sans <b>static</b> : sans lui, <code>assertEquals(...)</code> ne s'appelle pas directement. À vérifier avec ton cours.`});
+var Mo=mk("Ordre d'exécution (@TestMethodOrder)","L'ordre d'exécution n'est pas celui du fichier : @TestMethodOrder impose un ordre. Ton résumé donne deux styles d'import, court et long.",`import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+@TestMethodOrder(OrderAnnotation.class)
+
+
+import org.junit.jupiter.api.MethodOrderer;
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class OrdreTest {
+    @Test
+    @Order(1)
+    void premier() {
+    }
+
+    @Test
+    @Order(2)
+    void deuxieme() {
+    }
+}`,[
+[1,"import style court",`Importe directement la classe interne <code>OrderAnnotation</code> : on écrit ensuite <code>OrderAnnotation.class</code> (style court direct).`],
+[2,"annotation style court",`<code>@TestMethodOrder</code> impose l'ordre ; <code>OrderAnnotation</code> : l'ordre vient des annotations <code>@Order</code>.`,`en avoir besoin signale souvent une dépendance cachée entre tests.`],
+[3,"import style long",`Importe seulement <code>MethodOrderer</code> : on écrit <code>MethodOrderer.OrderAnnotation.class</code> (style long explicite).`],
+[4,"annotation style long",`Même effet que le style court, avec le nom complet de la classe interne.`],
+[6,"classe de tests ordonnés",`Une classe de tests classique, ordonnée par l'annotation au-dessus.`],
+[8,"premier test",`<code>@Order(1)</code> : les numéros les plus petits passent en premier.`],
+[9,"méthode du test n°1",`Une méthode de test est <code>void</code> et sans paramètre.`],
+[12,"deuxième test",`<code>@Order(2)</code> passe après le 1.`]]),
+Ms=mk("Suites de tests (JUnit Platform Suite)","Une suite regroupe plusieurs classes de tests pour les exécuter ensemble : par liste de classes, ou par package.",`import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
+
+@Suite
+@SelectClasses({
+    DiscountTest.class,
+    ClientServiceTest.class,
+    OrderCalculatorTest.class
+})
+public class MaSuiteDeTests {
+}
+
+
+import org.junit.platform.suite.api.SelectPackages;
+import org.junit.platform.suite.api.Suite;
+
+@Suite
+@SelectPackages("com.exemple.tests")
+public class SuiteParPackage {
+}`,[
+[1,"importer SelectClasses",`<code>SelectClasses</code> : choisir des classes de tests précises.`],
+[2,"importer Suite",`<code>Suite</code> : déclarer une suite.`],
+[3,"déclarer la suite",`<code>@Suite</code> : cette classe regroupe des tests à exécuter ensemble.`],
+[4,"ouvrir la liste de classes",`<code>({</code> : la parenthèse ouvre l'annotation, l'accolade ouvre le tableau de classes.`],
+[5,"première classe",`<code>.class</code> désigne le type. Les éléments sont séparés par des virgules.`],
+[6,"deuxième classe",`Même syntaxe, suivie d'une virgule.`],
+[7,"dernière classe",`Pas de virgule après le dernier élément.`],
+[8,"fermer la liste",`<code>})</code> : ferme le tableau puis l'annotation.`],
+[9,"classe de la suite",`<b>MaSuiteDeTests</b> exécute les trois classes ensemble. Le corps reste vide.`],
+[11,"importer SelectPackages",`<code>SelectPackages</code> : choisir tout un package.`],
+[13,"déclarer la suite",`Même annotation <code>@Suite</code>.`],
+[14,"sélectionner par package",`Exécute toutes les classes de tests du package <b>com.exemple.tests</b>.`],
+[15,"classe de la suite par package",`Classe vide : les annotations suffisent.`]]),
+Ma=mk("Annotations utiles","Les annotations utiles de ton résumé : nom lisible, désactivation, étiquette, limite de temps, test paramétré.",`@DisplayName("Appliquer une remise de 10% au-delà de 100€")
+@Test
+void testRemise() {
+    ...
+}
+
+
+@Disabled("Fonctionnalité en cours de développement")
+@Test
+void testNonPret() {
+    ...
+}
+
+
+@Tag("integration")
+@Test
+void testIntegrationBD() {
+    ...
+}
+
+
+@Timeout(2)
+@Test
+void testRapide() {
+    ...
+}
+
+
+@ParameterizedTest
+@ValueSource(ints = {50, 100, 150})
+void testRemiseAvecPlusieursValeurs(int montant) {
+    Discount d = new Discount();
+    double resultat = d.apply(montant);
+    ...
+}`,[
+[1,"nom lisible dans les rapports",`<code>@DisplayName</code> : le texte affiché dans les rapports à la place du nom de la méthode.`],
+[6,"désactiver un test",`<code>@Disabled</code> : le test n'est pas exécuté, on explique pourquoi entre guillemets.`],
+[11,"étiqueter un test",`<code>@Tag</code> : étiqueter pour filtrer dans Gradle / CI.`],
+[16,"limiter la durée",`<code>@Timeout(2)</code> : le test échoue au-delà de 2 secondes.`],
+[21,"test paramétré",`<code>@ParameterizedTest</code> remplace <code>@Test</code> : un même test est exécuté sur plusieurs valeurs.`],
+[22,"fournir les valeurs",`<code>@ValueSource(ints = {...})</code> : un tableau d'entiers, une exécution par valeur.`],
+[23,"méthode avec paramètre",`Elle reçoit la valeur courante dans <code>int montant</code>.`],
+[24,"créer l'objet à tester",`Étape « préparer » : on crée <code>Discount</code>.`],
+[25,"appeler avec la valeur",`Étape « exécuter » : <code>d.apply(montant)</code>, le résultat est un <code>double</code>.`]]);
+D.splice(3,2,Mo,Ms,Ma);
+var Z={};Object.keys(QZ).forEach(function(k){k=+k;Z[k>=5?k+1:k]=QZ[k]});Z[5]=QZ[4];
+Z[4]=[[`Quelle annotation sélectionne tous les tests d'un package dans une suite ?`,['@SelectClasses','@SelectPackages','@IncludeEngines'],1,`<code>@SelectPackages("com.exemple.tests")</code> : tous les tests du package. <code>@SelectClasses</code> : une liste de classes.`]];QZ=Z;
+QZ[0].push([`Dans JUnit 5, qui exécute les tests ?`,['Jupiter','Platform','Vintage'],1,`Jupiter : écrire les tests. Platform : les exécuter. Vintage : compatibilité avec les anciens tests.`],
+[`Quel import permet d'écrire <code>assertEquals(...)</code> sans préfixe ?`,['import org.junit.jupiter.api.Assertions.*;','import static org.junit.jupiter.api.Assertions.*;','import org.junit.jupiter.api.assertEquals;'],1,`Il faut <b>static</b> pour importer les méthodes statiques d'une classe.`]);
+QZ[2].push([`Quelles méthodes doivent être <code>static</code> ?`,['@BeforeEach et @AfterEach','@BeforeAll et @AfterAll','Toutes les méthodes de cycle de vie'],1,`@BeforeAll et @AfterAll s'exécutent une seule fois pour la classe : static. @BeforeEach et @AfterEach : non static.`],
+[`Combien d'instances de la classe de test JUnit crée-t-il ?`,['Une seule pour toute la classe','Une nouvelle pour chaque @Test','Deux : une avant, une après'],1,`Une nouvelle instance par test : isolation totale, aucune interférence.`]);
+QZ[7].push([`Qu'est-ce qu'un bouchon ?`,['Une doublure du composant appelé','Une doublure du composant appelant','Un test d\'intégration'],0,`Bouchon : remplace le composant appelé. Pilote : remplace le composant appelant.`],
+[`Dans le fil rouge, que représente un faux « client » qui appelle OrderService ?`,['Un bouchon','Un pilote','Un Fake'],1,`Un pilote simule le composant appelant.`]);
+QZ[11].push([`Vérifier que <code>total(...)</code> renvoie 20.0, c'est une vérification…`,[`d'état`,`d'interaction`,'de couverture'],0,`État = résultat final. Interaction = comment le SUT a parlé à ses collaborateurs.`]);
+QZ[13].push([`<code>mock(...)</code> + <code>verify(...)</code> joue quel rôle ?`,['Stub','Spy','Dummy'],1,`mock + when/thenReturn : Stub. mock + verify : Spy. Mockito n'implémente pas un vrai Mock au sens de Meszaros.`]);
+QZ[14].push([`Que fait <code>strictMock(...)</code> en plus ?`,['Il tolère les appels inattendus',`Il vérifie aussi l'ordre des appels`,'Il enregistre les appels comme un Spy'],1,`<code>niceMock</code> tolère les appels inattendus ; <code>strictMock</code> vérifie aussi l'ordre.`]);
+QZ[17].push([`C0 et C1, c'est quoi ?`,['C0 : instructions · C1 : branches (if, switch)','C0 : branches · C1 : instructions','C0 : classes · C1 : méthodes'],0,`C0 = instructions exécutées ; C1 = branches (if, switch).`]);
+D.forEach(function(m,i){m[0]=(i+1)+'. '+m[0].replace(/^\d+\.\s*/,'')});
+var s4=null;try{s4=JSON.parse(localStorage.getItem('ctaq-quiz4'))}catch(e){}K='ctaq-quiz4';if(s4&&D[s4.L])S=s4;else if(S.L>=5)S.L++;
+function dn(l){var t=l.trim(),m;if(/^(import|return|throw|new|if|for|while|switch|else|try|case|default)\b|^@/.test(t))return null;
+m=t.match(/\b(?:class|interface)\s+(\w+)/);if(m)return m[1];
+m=t.match(/^(?:(?:public|private|protected|static|final)\s+)*(?:[\w<>\[\],.?]+\s+)?(\w+)\s*\(.*\)\s*(?:throws\s+[\w., ]+)?\{/);if(m)return m[1];
+m=t.match(/^(?:(?:public|private|protected|static|final)\s+)*[\w<>\[\],.?]+\s+(\w+)\s*\([^)]*\)\s*;$/);return m?m[1]:null}
+function nl(l){var n=dn(l),s=norm(l);return n?s.replace(n,'_'):s}
+function al(e,g){var a=dn(e),b=dn(g),s=norm(g);return a&&b?s.replace(b,a):s}
+function skel(L,c,lang){var m={},cm=(lang=='gherkin'||lang=='plain')?'#':'//';L[2].forEach(function(l){m[l[1].trim()]=l[0]});
+return c.split('\n').filter(function(l){return l.trim()}).map(function(l){var t=l.trim(),n=dn(l);return l.slice(0,l.search(/\S/))+cm+' '+(m[t]||(/^[})\];,]+$/.test(t)?'fermer le bloc':'...'))+(n?' → nom : '+n:'')}).join('\n')}
+function cmpB(code,got,lang){
+var E=code.split('\n').filter(function(l){return l.trim()}),G=got.split('\n').map(sc).filter(function(l){return l.trim()&&!/^\s*(\/\/|#)/.test(l)}),en=E.map(nl),gn=G.map(nl),o=ops(en,gn),h='',bad=0,k=0,q,t,A,B,d;
+while(k<o.length){
+if(o[k][0]=='='){h+='<div class="ln">'+hl(E[o[k][1]],lang)+'</div>';k++;continue}
+A=[];B=[];while(k<o.length&&o[k][0]!='='){(o[k][0]=='-'?A:B).push(o[k]);k++}
+t=Math.max(A.length,B.length);
+for(q=0;q<t;q++){bad++;
+if(A[q]&&B[q]){d=diff(norm(E[A[q][1]]),al(E[A[q][1]],G[B[q][2]]));h+='<div class="ln ko"><div>'+d[0]+'</div><div class="you">'+d[1]+'</div></div>'}
+else if(A[q])h+='<div class="ln ko"><div><mark class="m">'+esc(E[A[q][1]])+'</mark></div><div class="you">ligne manquante</div></div>';
+else h+='<div class="ln ko"><div><mark class="x">'+esc(G[B[q][2]])+'</mark></div><div class="you">ligne en trop</div></div>'}}
+return[h,bad]}
+function check(){var a=document.getElementById('a'),bm=S.M=='block',L=D[S.L],o=(bm?BL(L):L[2])[rec?rec.j:S.I];ans=a.value;
+if(bm){RS=cmpB(o[1],ans,o[2]||'java');ok=!RS[1]}else ok=nl(ans)==nl(o[1]);ph='res';render()}
+function qcmH(){var Q=QZ[S.L],q=Q[qm.i],a=qm.p>=0;if(qm.oi!==qm.i){qm.o=q[1].map(function(_,j){return j}).sort(function(){return Math.random()-.5});qm.oi=qm.i}
+var h='<p class="k">Quiz · question '+(qm.i+1)+' / '+Q.length+' · score '+qm.s+'</p><p class="qq">'+q[0]+'</p>';
+qm.o.forEach(function(j,k){var c='opt';if(a){if(j==q[2])c+=' good';else if(j==qm.p)c+=' bad'}h+='<button class="'+c+'" '+(a?'disabled':'onclick="pick('+j+')"')+'><b>'+'ABCD'[k]+'</b><span>'+q[1][j]+'</span></button>'});
+if(a)h+='<div class="res '+(qm.p==q[2]?'ok':'ko')+'"><b>'+(qm.p==q[2]?'Correct.':'Pas tout à fait.')+'</b> '+q[3]+'</div>'+(qm.i+1==Q.length?'<p class="sm">Score du quiz : '+qm.s+' / '+Q.length+'</p>':'')+'<button onclick="qn()">'+(qm.i+1<Q.length?'Question suivante':'Continuer')+'</button>';
+return h}
+QZ[0].push([`Quel import est correct pour <code>@Test</code> de JUnit 5 ?`,['import org.junit.Test;','import org.junit.jupiter.api.Test;','import junit.jupiter.Test;'],1,`JUnit 4 : <code>org.junit.Test</code>. JUnit 5 : <code>org.junit.jupiter.api.Test</code>.`],
+[`D'où vient <code>@ParameterizedTest</code> ?`,['org.junit.jupiter.api','org.junit.jupiter.params','org.junit.platform.suite.api'],1,`Du module <code>junit-jupiter-params</code> : paquetage <code>org.junit.jupiter.params</code>.`],
+[`Quel paquetage fournit <code>IncludeEngines</code> ?`,['org.junit.platform.suite.api','org.junit.jupiter.api','io.cucumber.java.en'],0,`Les annotations de suite sont dans <code>org.junit.platform.suite.api</code>.`],
+[`Quel paquetage fournit <code>@Given</code>, <code>@When</code>, <code>@Then</code> ?`,['io.cucumber.java.en','org.junit.jupiter.api','org.hamcrest'],0,`<code>io.cucumber.java.en</code>, dans la dépendance <code>cucumber-java</code>.`]);
+QZ[1].push([`Quel est le triptyque d'un test JUnit ?`,['préparer → exécuter → vérifier','lire → écrire → fermer','compiler → lancer → afficher'],0,`On prépare l'objet, on exécute la méthode, on vérifie avec une assertion.`],
+[`Que fait <code>assertThrows(IllegalArgumentException.class, () -> remise.apply(-1.0))</code> ?`,[`Il vérifie que l'appel lève cette exception`,'Il vérifie que remise vaut -1.0','Il attrape toutes les exceptions sans rien vérifier'],0,`Il réussit seulement si l'exception est levée, et il renvoie l'exception capturée.`],
+[`Que fait <code>assertAll(...)</code> ?`,[`Il s'arrête au premier échec`,`Il exécute toutes les vérifications même si l'une échoue`,'Il lance tous les tests de la classe'],1,`Toutes les vérifications sont évaluées, même si l'une échoue.`]);
+QZ[2].push([`Que fait <code>@AfterEach</code> ?`,[`Il initialise la fixture`,'Il nettoie après chaque test',`Il s'exécute une fois à la fin`],1,`Nettoyage ou libération de ressources après chaque test ; méthode non static.`]);
+QZ[3].push([`Que signale souvent le besoin d'imposer un ordre aux tests ?`,['Une dépendance cachée entre tests','Un test trop rapide','Un import manquant'],0,`Chaque test doit pouvoir s'exécuter seul et dans n'importe quel ordre.`],
+[`Que signifie <code>OrderAnnotation</code> dans <code>@TestMethodOrder</code> ?`,[`L'ordre est donné par les annotations @Order`,'Ordre alphabétique','Ordre aléatoire'],0,`<code>@Order(n)</code> fixe la place de chaque test.`]);
+QZ[4].push([`Quelle annotation déclare une classe comme suite ?`,['@Suite','@TestSuite','@RunAll'],0,`<code>@Suite</code>, avec <code>@SelectClasses</code> ou <code>@SelectPackages</code>.`],
+[`Que fait <code>@SelectClasses({A.class, B.class})</code> ?`,['Il exécute ces deux classes de tests ensemble','Il importe ces deux classes','Il crée deux suites'],0,`Il regroupe les classes listées dans la suite.`]);
+QZ[5].push([`Combien de fois s'exécute un test avec <code>@ValueSource(ints = {50, 100, 150})</code> ?`,['1 fois','3 fois','150 fois'],1,`Une exécution par valeur du tableau.`],
+[`Quelle annotation désactive un test en expliquant pourquoi ?`,['@Disabled("raison")','@Skip("raison")','@Tag("raison")'],0,`<code>@Disabled</code> prend la raison entre guillemets.`],
+[`À quoi sert <code>@Tag("integration")</code> ?`,['À nommer le test dans les rapports','À filtrer les tests dans Gradle / CI','À limiter la durée'],1,`C'est une étiquette pour ne lancer qu'une catégorie. <code>@DisplayName</code> sert au nom lisible.`]);
+QZ[6].push([`Quelle ligne est correcte ?`,['assertThat(hasSize(2), panier.refs());','assertThat(panier.refs(), hasSize(2));','assertThat(panier.refs().hasSize(2));'],1,`La forme est <code>assertThat(valeur, matcher)</code>.`],
+[`Que vérifie <code>allOf(m1, m2)</code> ?`,['Au moins un des matchers','Tous les matchers','Aucun matcher'],1,`<code>allOf</code> : conjonction. <code>anyOf</code> : disjonction.`]);
+QZ[7].push([`Que renvoie <code>total(refs)</code> ?`,['La somme des prix des articles',`Le nombre d'articles`,'Un message'],0,`Il additionne <code>priceOf(ref)</code> pour chaque référence.`],
+[`Qu'est-ce qu'un collaborateur ?`,[`Un composant avec lequel le module testé interagit (BDD, API, classe...)`,'Le test lui-même','Un framework de test'],0,`Les collaborateurs sont remplacés par des doublures dans un test unitaire.`]);
+QZ[8].push([`Quand utilise-t-on un Dummy ?`,['Pour remplir un paramètre jamais utilisé','Pour vérifier les appels','Pour simuler une base de données'],0,`Il sert uniquement à satisfaire une signature.`],
+[`Pourquoi le test « commande vide » peut-il utiliser des Dummy ?`,['La liste vide empêche tout appel aux collaborateurs','Les Dummy sont plus rapides',`Java l'exige`],0,`La boucle ne tourne pas : aucun appel à <code>priceOf</code>.`]);
+QZ[9].push([`Que fait <code>Map.copyOf(catalogue)</code> ?`,['Il crée une copie immuable','Il supprime le catalogue','Il trie les clés'],0,`Copie défensive : le Fake ne dépend plus de la map d'origine.`],
+[`Que renvoie <code>getOrDefault(ref, 0.0)</code> pour une référence absente ?`,['null','0.0','Une exception'],1,`La valeur par défaut donnée en second paramètre.`]);
+QZ[10].push([`Que renvoie le Stub pour la référence « Z » ?`,['Une exception','0.0 (cas default)','12.0'],1,`Le cas <code>default</code> renvoie 0.0.`],
+[`Les réponses d'un Stub sont…`,['écrites en dur','calculées depuis un catalogue configurable','enregistrées puis vérifiées'],0,`Le Fake, lui, a un catalogue configurable.`]);
+QZ[11].push([`Que renvoie <code>nombreDeMessages()</code> après un seul <code>confirm</code> ?`,['0','1','2'],1,`<code>confirm</code> envoie un seul message.`],
+[`Pourquoi écrire <code>INotifier notifier = spy;</code> ?`,[`Le composant ne voit que l'interface, le test garde l'API d'observation`,'Pour copier le Spy',`C'est obligatoire en Java`],0,`Même objet, deux vues différentes.`]);
+QZ[12].push([`Que se passe-t-il si le Mock reçoit un appel avec d'autres arguments ?`,[`Il l'ignore`,'Il lève une AssertionError','Il renvoie 0'],1,`Il échoue dès qu'il reçoit un appel imprévu.`],
+[`Quand les attentes du Mock sont-elles contrôlées en fin de test ?`,['Quand le test appelle <code>verifie()</code>','Avant le constructeur','Jamais'],0,`Le test déclenche le contrôle, la doublure le porte.`]);
+QZ[13].push([`Quelle ligne vérifie qu'aucun message d'erreur n'est envoyé ?`,['verify(notifier, never()).send(any(), contains("erreur"));','verify(never(), notifier).send(any());','never(notifier).send(any());'],0,`<code>verify(mock, never())</code> vérifie qu'un appel n'a jamais eu lieu.`],
+[`Que fait <code>when(...).thenThrow(...)</code> ?`,['Il programme une exception (Stub)','Il vérifie une exception','Il crée un Spy'],0,`C'est la réponse programmée : une exception.`]);
+QZ[14].push([`Comment enregistre-t-on l'appel attendu d'une méthode void ?`,[`En l'appelant sur la doublure en mode record`,'Avec <code>expect(...).andReturn()</code>','Avec <code>verify()</code>'],0,`Pour une méthode void, l'appel lui-même est enregistré.`],
+[`Avec EasyMock, un appel imprévu…`,['est ignoré','fait échouer immédiatement','renvoie null'],1,`Échec immédiat (AssertionError). Avec Mockito : ignoré, réponse par défaut.`]);
+QZ[15].push([`Quel mot-clé prolonge une étape ?`,['And','Feature','Scenario'],0,`<code>And</code> (et) et <code>But</code> (mais) prolongent une étape.`],
+[`Où place-t-on les fichiers .feature ?`,['src/test/resources/..., même paquetage que les étapes','src/main/java','build/'],0,`Dans les ressources de test.`]);
+QZ[16].push([`À quoi correspond <code>{string}</code> dans une étape ?`,['Un texte entre guillemets extrait de la phrase','Un nombre décimal','Un objet Java'],0,`<code>{double}</code> : nombre ; <code>{string}</code> : texte entre guillemets.`],
+[`Quelles dépendances de test faut-il pour Cucumber avec JUnit ?`,['cucumber-java, cucumber-junit-platform-engine, junit-platform-suite','junit-vintage seulement','mockito seulement'],0,`Les trois dépendances citées dans le cours.`]);
+QZ[17].push([`Quelle commande lance les tests et génère le rapport ?`,['./gradlew test jacocoTestReport','./gradlew build jacoco','gradle run'],0,`Rapport HTML : <code>build/reports/jacoco/test/html/index.html</code>.`]);
+var R0=render;render=function(){R0();seg()};
+render();
+</script>
+</body>
+</html>
